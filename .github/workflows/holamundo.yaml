@@ -8,5 +8,6 @@ jobs:
       - name: Exec HolaMundo y LS
         run: |
           echo "Hola Mundo"
+          pwd
           ls -lah -R
           echo "Fin del Script"
