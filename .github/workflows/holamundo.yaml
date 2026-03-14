@@ -1,0 +1,12 @@
+name: Run Hello World and LS
+on: [push]
+
+jobs:
+  run-inline-script:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Exec HolaMundo y LS
+        run: |
+          echo "Hola Mundo"
+          ls -lah -R
+          echo "Fin del Script"
