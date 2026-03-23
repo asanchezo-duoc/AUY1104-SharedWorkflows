@@ -2,6 +2,11 @@ name: Deploy API to Docker Hub
 
 on:
   workflow_call:
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
   workflow_dispatch:
 
 jobs:
