@@ -35,6 +35,11 @@ on:
           - minikube
           - none
         default: k3s
+      provision_dockerhub:
+        description: ¿Provisionar Docker Hub en el cluster? (desmarcar si en clase lo hacen manual)
+        required: true
+        type: boolean
+        default: true
 
 jobs:
   delegar-receta-ea2:
@@ -44,6 +49,7 @@ jobs:
       instance_type: ${{ inputs.instance_type }}
       ssh_cidr_ipv4: ${{ inputs.ssh_cidr_ipv4 }}
       k8s_stack: ${{ inputs.k8s_stack }}
+      provision_dockerhub: ${{ inputs.provision_dockerhub }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
