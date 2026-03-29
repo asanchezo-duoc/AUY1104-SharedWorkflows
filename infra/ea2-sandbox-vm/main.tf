@@ -73,8 +73,8 @@ resource "aws_instance" "lab" {
   vpc_security_group_ids = [aws_security_group.lab.id]
 
   root_block_device {
-    volume_size           = 30
-    volume_type           = "gp3"
+    volume_size           = var.root_volume_size
+    volume_type           = var.root_volume_type
     delete_on_termination = true
   }
 

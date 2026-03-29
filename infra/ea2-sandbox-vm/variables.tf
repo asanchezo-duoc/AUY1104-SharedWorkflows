@@ -31,3 +31,15 @@ variable "k8s_nodeport_max" {
   description = "Puerto máximo NodePort a abrir (académico)"
   default     = 32767
 }
+
+variable "root_volume_size" {
+  type        = number
+  description = "GiB disco raiz. AWS Academy suele limitar tamano; 8 GiB suele pasar."
+  default     = 8
+}
+
+variable "root_volume_type" {
+  type        = string
+  description = "gp2 suele estar permitido en Learner Lab; gp3 a veces tiene deny explicito."
+  default     = "gp2"
+}
