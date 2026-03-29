@@ -9,7 +9,7 @@ output "instance_id" {
 }
 
 output "ssh_user" {
-  description = "Usuario SSH por defecto en Ubuntu oficial"
+  description = "Usuario SSH en AMI Ubuntu oficial de Canonical"
   value       = "ubuntu"
 }
 
