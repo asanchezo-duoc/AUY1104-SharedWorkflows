@@ -29,7 +29,8 @@ data "aws_vpc" "default" {
 
 resource "aws_security_group" "lab" {
   name        = "ea2-lab-sg-${random_id.suffix.hex}"
-  description = "EA2 laboratorio — SSH + NodePort (contexto académico)"
+  # AWS exige ASCII en GroupDescription (sin tildes ni guiones tipograficos).
+  description = "EA2 lab: SSH + NodePort range (academic sandbox)"
   vpc_id      = data.aws_vpc.default.id
 
   ingress {
