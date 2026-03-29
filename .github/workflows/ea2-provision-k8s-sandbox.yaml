@@ -182,7 +182,18 @@ jobs:
           if [ -n "${DOCKER_USERNAME:-}" ] && [ -n "${DOCKER_PASSWORD:-}" ]; then
             UB64=$(printf '%s' "$DOCKER_USERNAME" | base64 -w0)
             PB64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
-            $REMOTE "set -e; U=\$(echo '${UB64}' | base64 -d); P=\$(echo '${PB64}' | base64 -d); ${KUB} delete secret dockerhub-cred -n default --ignore-not-found; ${KUB} create secret docker-registry dockerhub-cred --docker-server=https://index.docker.io/v1/ --docker-username=\"\$U\" --docker-password=\"\$P\" --docker-email=noreply@local -n default; ${KUB} patch serviceaccount default -n default -p '{\"imagePullSecrets\":[{\"name\":\"dockerhub-cred\"}]}'"
+            $REMOTE "set -e; U=\$(echo '${UB64}' | base64 -d); P=\$(echo '${PB64}' | base64 -d); ${KUB} delete secret dockerhub-cred -n default --ignore-not-found; ${KUB} create secret docker-registry dockerhub-cred --docker-server=https://index.docker.io/v1/ --docker-username=\"\$U\" --docker-password=\"\$P\" --docker-email=noreply@local -n default"
+            for attempt in $(seq 1 40); do
+              if $REMOTE "${KUB} get serviceaccount default -n default" >/dev/null 2>&1; then
+                break
+              fi
+              if [ "$attempt" -eq 40 ]; then
+                echo "Timeout: no aparece serviceaccount default en namespace default"
+                exit 1
+              fi
+              sleep 2
+            done
+            $REMOTE "${KUB} patch serviceaccount default -n default -p '{\"imagePullSecrets\":[{\"name\":\"dockerhub-cred\"}]}'"
           fi
 
       - name: Resumen (IP + hints)
