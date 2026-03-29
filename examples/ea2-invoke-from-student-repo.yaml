@@ -7,9 +7,11 @@
 #   EA2_SSH_PRIVATE_KEY   → PEM (OpenSSH); la misma pareja la usa Terraform (pública derivada en CI) y SSH en el runner
 #
 # Opcional (p. ej. AWS Academy / Learner Lab con credenciales temporales):
-#   Añade en el bloque `secrets:` del job la línea:
-#     AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
-#   Si no usas STS, no declares esa línea ni el secreto.
+#   AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+#
+# Opcional — pulls privados Docker Hub en namespace default (mismos nombres que EA1):
+#   DOCKER_USERNAME, DOCKER_PASSWORD (token recomendado)
+#   En `secrets:` del job añade esas dos líneas; si faltan, solo sirven imagenes publicas.
 
 on:
   workflow_dispatch:
@@ -26,3 +28,5 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       EA2_SSH_PRIVATE_KEY: ${{ secrets.EA2_SSH_PRIVATE_KEY }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

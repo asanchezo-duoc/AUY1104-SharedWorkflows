@@ -43,6 +43,10 @@ on:
       EA2_SSH_PRIVATE_KEY:
         description: Clave privada PEM (OpenSSH) emparejada con la pública en la instancia
         required: true
+      DOCKER_USERNAME:
+        required: false
+      DOCKER_PASSWORD:
+        required: false
 
   workflow_dispatch:
     inputs:
@@ -154,6 +158,8 @@ jobs:
           PUBLIC_IP: ${{ steps.out.outputs.public_ip }}
           SSH_USER: ${{ steps.out.outputs.ssh_user }}
           STACK: ${{ inputs.k8s_stack }}
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           set -euo pipefail
           REMOTE='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ~/.ssh/ea2_lab.pem '"${SSH_USER}"'@'"$PUBLIC_IP"
@@ -161,14 +167,22 @@ jobs:
           if [ "$STACK" = "k3s" ]; then
             $REMOTE 'curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--write-kubeconfig-mode 644" sh -'
             $REMOTE 'sudo kubectl get nodes || true'
+            KUB="sudo kubectl"
           elif [ "$STACK" = "minikube" ]; then
             $REMOTE 'sudo apt-get update -y && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker.io conntrack'
             $REMOTE 'curl -fsSL -o /tmp/minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && sudo install /tmp/minikube /usr/local/bin/minikube && chmod +x /usr/local/bin/minikube'
             $REMOTE 'sudo minikube start --driver=docker --force --wait=all'
             $REMOTE 'sudo minikube kubectl -- get nodes || true'
+            KUB="sudo minikube kubectl --"
           else
             echo "k8s_stack desconocido: $STACK"
             exit 1
+          fi
+
+          if [ -n "${DOCKER_USERNAME:-}" ] && [ -n "${DOCKER_PASSWORD:-}" ]; then
+            UB64=$(printf '%s' "$DOCKER_USERNAME" | base64 -w0)
+            PB64=$(printf '%s' "$DOCKER_PASSWORD" | base64 -w0)
+            $REMOTE "set -e; U=\$(echo '${UB64}' | base64 -d); P=\$(echo '${PB64}' | base64 -d); ${KUB} delete secret dockerhub-cred -n default --ignore-not-found; ${KUB} create secret docker-registry dockerhub-cred --docker-server=https://index.docker.io/v1/ --docker-username=\"\$U\" --docker-password=\"\$P\" --docker-email=noreply@local -n default; ${KUB} patch serviceaccount default -n default -p '{\"imagePullSecrets\":[{\"name\":\"dockerhub-cred\"}]}'"
           fi
 
       - name: Resumen (IP + hints)
